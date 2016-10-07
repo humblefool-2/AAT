@@ -1,0 +1,24 @@
+from scrapy.spiders import BaseSpider                                                                                                                                                       
+from scrapy.selector import HtmlXPathSelector                                                                                                                                               
+from craigslist_sample.items import CraigslistSampleItem                                                                                                                                    
+import itertools                                                                                                                                                                            
+                                                                                                                                                                                            
+                                                                                                                                                                                            
+class MySpider(BaseSpider):                                                                                                                                                                 
+    name = "craig"                                                                                                                                                                          
+    allowed_domains = ["play.google.com"]                                                                                                                                                   
+    start_urls = ["https://play.google.com/store/search?q=message%20app"]                                                                                                                   
+                                                                                                                                                                                            
+    def parse(self, response):                                                                                                                                                              
+        #names = response.xpath("//div")                                                                                                                                                    
+        #reviews = response.xpath("//div[@class='review-body with-review-wrapper']")                                                                                                        
+        items=[]                                                                                                                                                                            
+        links=response.xpath("//div[@class='card no-rationale square-cover apps small']//div[@class='card-content id-track-click id-track-impression']")                                    
+        titles=response.xpath("//div[@class='card no-rationale square-cover apps small']//div[@class='card-content id-track-click id-track-impression']//div[@class='cover']//div[@class='co
+ver-image-container']//div[@class='cover-outer-align']//div[@class='cover-inner-align']")                                                                                                   
+        #for link in links:                                                                                                                                                                 
+        item=CraigslistSampleItem()                                                                                                                                                         
+        item["link"]= links.select("a[@class='card-click-target']/@href").extract()                                                                                                         
+        item["title"]= titles.select("img/@alt").extract()                                                                                                                                  
+        items.append(item)                                                                                                                                                                  
+        return item                                                                                                                                                                                              

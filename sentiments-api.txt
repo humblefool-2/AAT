@@ -1,0 +1,15 @@
+import json, requests, unirest                                                                                                                                                              
+from pattern.en import sentiment                                                                                                                                                            
+review=["the app used to work good earlier but now it hangs too much can somebody suggest me something?"]                                                                                   
+s=dict(map(None, *[iter(review)]*2))                                                                                                                                                        
+response = unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/",                                                                                                       
+  headers={                                                                                                                                                                                 
+    "X-Mashape-Key": "I30aaFxZvwmshEZnfICyrLJcwpEjp1e80CPjsnCufIeFbQptxJ",                                                                                                                  
+    "Content-Type": "application/x-www-form-urlencoded",                                                                                                                                    
+    "Accept": "application/json"                                                                                                                                                            
+  },                                                                                                                                                                                        
+  params={                                                                                                                                                                                  
+    "text": review                                                                                                                                                                          
+  }                                                                                                                                                                                         
+)                                                                                                                                                                                           
+print (response.body['type'])   

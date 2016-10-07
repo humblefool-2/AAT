@@ -1,0 +1,33 @@
+import urllib2, json, requests, unirest 
+from pattern.en import sentiment   
+from bs4 import BeautifulSoup as bs
+
+def analysis(review):                                                                                                                                                       
+  response = unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/",                                                                                                       
+  headers={                                                                                                                                                                                 
+    "X-Mashape-Key": "I30aaFxZvwmshEZnfICyrLJcwpEjp1e80CPjsnCufIeFbQptxJ",                                                                                                                  
+    "Content-Type": "application/x-www-form-urlencoded",                                                                                                                                    
+    "Accept": "application/json"                                                                                                                                                            
+    },                                                                                                                                                                                        
+  params={                                                                                                                                                                                  
+      "text": review                                                                                                                                                                          
+    }                                                                                                                                                                                         
+  )                                                                                                                                                                                           
+  return (response.body['score'])   
+
+
+
+blog = "https://www.analyticsvidhya.com/blog/2015/10/beginner-guide-web-scraping-beautiful-soup-python/"
+page=urllib2.urlopen(blog)
+soup=bs(page)
+data=soup.find('ul',class_='comment-list')
+'''for r in data:
+  print r
+  print ('\n yes\n')'''
+r=data.find_all('p')
+i=0
+j=0
+for x in r:
+  i+=analysis(x.get_text().encode('utf-8'))
+  j+=1
+print i/j,j                                                                                                                                                                                                                                                                                                                                                                                                        

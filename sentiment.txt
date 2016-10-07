@@ -1,0 +1,15 @@
+from pattern.en import sentiment                                                                                                                                                            
+import re                                                                                                                                                                                   
+fo=open("/home/abhijain/Desktop/craigslist_sample/out.json")                                                                                                                                
+s=fo.read()                                                                                                                                                                                 
+m=re.findall('"([^"]*)"',s)                                                                                                                                                                 
+cnt=len(m)                                                                                                                                                                                  
+n=0.0                                                                                                                                                                                       
+p=0.0                                                                                                                                                                                       
+for a in m:                                                                                                                                                                                 
+   e,f=map(float,sentiment(a))                                                                                                                                                              
+   print e,f                                                                                                                                                                                
+   n+=e                                                                                                                                                                                     
+   p+=f                                                                                                                                                                                     
+print n/cnt,p/cnt                                                                                                                                                                           
+print cnt
