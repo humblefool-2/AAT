@@ -1,0 +1,32 @@
+database->app_db
+pwd->kuchbhi123
+
+table			column
+
+apps			
++-----------+-------------+------+-----+---------+----------------+                                                                                                                         
+| Field     | Type        | Null | Key | Default | Extra          |                                                                                                                         
++-----------+-------------+------+-----+---------+----------------+                                                                                                                         
+| app_id    | bigint(20)  | NO   | PRI | NULL    | auto_increment |                                                                                                                         
+| app_name  | varchar(45) | YES  |     | NULL    |                |                                                                                                                         
+| pkg_name  | varchar(45) | YES  | UNI | NULL    |                |                                                                                                                         
+| app_score | float       | YES  |     | 0       |                |                                                                                                                         
++-----------+-------------+------+-----+---------+----------------+
+
+users
++------------+-------------+------+-----+---------+----------------+                                                                                                                        
+| Field      | Type        | Null | Key | Default | Extra          |                                                                                                                        
++------------+-------------+------+-----+---------+----------------+                                                                                                                        
+| user_id    | bigint(20)  | NO   | PRI | NULL    | auto_increment |                                                                                                                        
+| user_name  | varchar(45) | YES  |     | NULL    |                |                                                                                                                        
+| user_score | float       | YES  |     | 0       |                |                                                                                                                        
++------------+-------------+------+-----+---------+----------------+ 
+
+
+user_apps
++---------+------------+------+-----+---------+-------+                                                                                                                                     
+| Field   | Type       | Null | Key | Default | Extra |                                                                                                                                     
++---------+------------+------+-----+---------+-------+                                                                                                                                     
+| user_id | bigint(20) | YES  |     | NULL    |       |                                                                                                                                     
+| app_id  | bigint(20) | YES  |     | NULL    |       |                                                                                                                                     
++---------+------------+------+-----+---------+-------+ 

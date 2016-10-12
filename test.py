@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, json
 from flaskext.mysql import MySQL
 app = Flask(__name__)                                                                                                                                                                       
 import urllib2, json,  unirest                                                                                                                                                     
@@ -33,47 +33,47 @@ def analysis(review):  #used for sentiment analysis of all reviews of a particul
   return (response.body['score'])                                                                                                                                                           
 
 @app.route('/sp_page',methods=['POST','GET'])
-def specific_page(link): #fetches all reviews with their author's name                                                                                                                      
-  app="https://play.google.com"+link                                                                                                                                                        
-  page=urllib2.urlopen(app)                                                                                                                                                                 
-  soup=bs(page)                                                                                                                                                                             
-  author=soup.find_all('div',class_='review-info')                                                                                                                                          
-  review=soup.find_all('div',class_='review-body with-review-wrapper')                                                                                                                      
-  for d,s in zip(author,review):                                                                                                                                                            
-    r=d.find('span',class_='author-name').get_text()                                                                                                                                        
-    t=s.get_text().encode('utf-8')                                                                                                                                                          
-    print r,t                                                                                                                                                                               
+def specific_page(): #fetches all reviews with their author's name  
+  try:    
+    #app="https://play.google.com"+link                                                                                                                                                        
+    #page=urllib2.urlopen(app)                                                                                                                                                                 
+    #soup=bs(page)                                                                                                                                                                             
+    #author=soup.find_all('div',class_='review-info')                                                                                                                                          
+    #review=soup.find_all('div',class_='review-body with-review-wrapper')                                                                                                                      
+    #for d,s in zip(author,review):       
+     # r=d.find('span',class_='author-name').get_text()                                                                                                                                        
+      #t=s.get_text().encode('utf-8')                                                                                                                                                          
+      #print r,t        
+    # connect to mysql
+    con=mysql.connect()
+    cursor=con.cursor()
+    cursor.execute("SELECT VERSION()")
+    ver = cursor.fetchone()
+    if ver:
+                     
+                     return json.dumps('Connection made.')
+    else:
+                     return json.dumps('Connection not made.')
+  except Exception as e:
+    return render_template('error.html',error=str(e)) 
+  finally:
+    cursor.close()
+    con.close()                                                                                                                                                                               
 
 @app.route('/category',methods=['POST','GET'])
-def category(): #fetches all apps belong to the category  
-  try:
-    
-         #link="https://play.google.com/store/search?q=message%20app"                                                                                                                               
-      #page=urllib2.urlopen(link)                                                                                                                                                                
-      #soup=bs(page)                                                                                                                                                                             
-      #links=soup.find_all('div',class_='card no-rationale square-cover apps small')                                                                                                             
-      #titles=soup.find_all('div',class_='card no-rationale square-cover apps small')                                                                                                            
-      #for r,s in zip(links,titles):                                                                                                                                                             
-        #print r.a['href'],s.img['alt']'''
-         # connect to mysql
-        con=mysql.connect()
-        cursor=con.cursor()
-        cursor.execute("SELECT VERSION()")
-        ver = cursor.fetchone()
-        if ver:
-                     return render_template('error.html',error='Connection made.')
-        else:
-                     return render_template('error.html',error='Connection not made.')
-  except Exception as e:
-        return render_template('error.html',error=str(e)) 
-  finally:
-        cursor.close()
-        con.close()                                                                                                                                    
+def category(): #fetches all apps belong to the category 
+  link="https://play.google.com/store/search?q=message%20app"                                                                                                                               
+  page=urllib2.urlopen(link)                                                                                                                                                                
+  soup=bs(page)                                                                                                                                                                             
+  links=soup.find_all('div',class_='card no-rationale square-cover apps small')                                                                                                             
+  titles=soup.find_all('div',class_='card no-rationale square-cover apps small')                                                                                                            
+  for r,s in zip(links,titles):     
+    print r.a['href'],s.img['alt']                                                                                                                                
                                                                                                                                                                                             
 @app.route("/",methods=['POST','GET'])                                                                                                                                                                             
 def main():
-   #return ('Welcome')
-    return redirect('/category')
+   #return json.dumps('Welcome')
+    return render_template('index.html')
   
 if __name__ == "__main__":
   #app.debug=True
