@@ -35,56 +35,117 @@ def analysis(review):  #returns sentiment analysis score of a review by fetching
                                                                                                                                                                                             
 @app.route('/sp_page',methods=['POST','GET'])                                                                                                                                               
 def specific_page(): #fetches all reviews with their author's name                                                                                                                          
-  try:                                                                                                                                                                                      
+  try:   
+   
     link="/store/apps/details?id=com.mxtech.videoplayer.ad"                                                                                                                                 
     a=re.search(r'\=(.*)',link,re.M|re.I)                                                                                                                                                   
     p_pkg=a.group(1)   #stores the unique package name of app                                                                                                                                                                 
     app="https://play.google.com"+link                                                                                                                                                      
                                                                                                                                                                                             
     page=urllib2.urlopen(app)                                                                                                                                                               
-                                                                                                                                                                                            
-    soup=bs(page)                                                                                                                                                                           
+                                                                                                                                                                                          
+    soup=bs(page)
+    
     p_name=soup.find('div',class_='id-app-title').get_text().encode('utf-8')  #stores app name that can be searched directly                                                                                                            
     author=soup.find_all('div',class_='review-info')  #fetches the reviewrs' names                                                                                                                                      
-                                                                                                                                                                                            
+    images=soup.find_all('span',class_='responsive-img-hdpi') #fetches all images' url                                                                                                                                                                                       
     review=soup.find_all('div',class_='review-body with-review-wrapper')  #fetches their corresponding reviews                                                                                                                  
+    p_stars=soup.find('div',class_='score').get_text() #fetches the overall star rating of app
+    p_downloads=long(soup.find('span',class_='reviews-num').get_text().replace(',','')) #fetches the number of downloads
+    p_company=soup.find('span',itemprop='name').get_text() #fetches the developing company
+    p_category=soup.find('span',itemprop='genre').get_text() #fetches the category of app
+    
+    # connect to mysql database                                                                                                                                                                      
+    con = MySQLdb.connect( host="localhost", user="root", passwd="kuchbhi123", db="app_db")     
+    
     cnt=0                                                                                                                                                                                   
-    p_score=0                                                                                                                                                                             
+    p_score=0  
     for s in review:  #iterate over all reviews and calculate their individual score                                                                                                                                                                     
       t=s.get_text().encode('utf-8')                                                                                                                                                        
       cnt+=1                                                                                                                                                                                
       p_score+=analysis(s)                                                                                                                                                                
     p_score/=cnt                                                                                                                                                                          
-    # connect to mysql database                                                                                                                                                                      
-    con = MySQLdb.connect( host="localhost", user="root", passwd="kuchbhi123", db="app_db")                                                                                                                                                                    
+                                                                                                                                                                   
     cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                 
-    t_id=long(0)                                                                                                                                                                            
-    cursor.callproc('sp_createapp',(p_name,p_pkg,p_score,t_id))                                                                                                                                                                                                                                                                                                      
+    t_id=long(0)  
+    cursor.callproc('sp_createapp',(p_name,p_pkg,p_score,p_downloads,p_stars,p_company,p_category,t_id))                                                                                                                                                                                                                                                                                                      
     cursor.close()                                                                                                                                                                         
     cursor = con.cursor()                                                                                                                                                                   
-    cursor.execute('SELECT @_sp_createapp_3');                                                                                                                                                
+    cursor.execute('SELECT @_sp_createapp_7');                                                                                                                                                
     outParam = cursor.fetchall()   
     con.commit()
     p_id=long(outParam[0][0])                                                                                                                                                                   
     cursor.close()
-    for r in author:
-      a_name=r.find('span',class_='author-name').get_text()
+    
+    #fetch the total users for each star type rating and insert into table
+     
+    #for 5 stars
+    fv_type=soup.find('div',class_='rating-bar-container five')
+    fv_user=long(fv_type.find('span',class_='bar-number').get_text().replace(',',''))
+    cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    cursor.callproc('sp_appstar',(p_id,'5',fv_user)) 
+    con.commit()
+    cursor.close()
+   
+    #for 4 stars
+    fr_type=soup.find('div',class_='rating-bar-container four')
+    fr_user=long(fr_type.find('span',class_='bar-number').get_text().replace(',',''))
+    cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    cursor.callproc('sp_appstar',(p_id,'4',fr_user)) 
+    con.commit()
+    cursor.close()
+    
+    #for 3 stars
+    tr_type=soup.find('div',class_='rating-bar-container three')
+    tr_user=long(tr_type.find('span',class_='bar-number').get_text().replace(',',''))
+    cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    cursor.callproc('sp_appstar',(p_id,'3',tr_user)) 
+    con.commit()
+    cursor.close()
+    
+    #for 2 stars
+    tw_type=soup.find('div',class_='rating-bar-container two')
+    tw_user=long(tw_type.find('span',class_='bar-number').get_text().replace(',',''))
+    cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    cursor.callproc('sp_appstar',(p_id,'2',tw_user)) 
+    con.commit()
+    cursor.close()
+    
+    #for 1 star
+    on_type=soup.find('div',class_='rating-bar-container one')
+    on_user=long(on_type.find('span',class_='bar-number').get_text().replace(',',''))
+    cursor=con.cursor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+    cursor.callproc('sp_appstar',(p_id,'1',on_user)) 
+    con.commit()
+    cursor.close()
+     
+    for r,i in zip(author,images):
+      a_name=r.find('span',class_='author-name').get_text() #fetch the author's name
+      r_date=r.find('span',class_='review-date').get_text() #fetches author's review date
+      url=i.span['style'] #fetches the author's image url
+      image_url=url[21:-1]
+      a_star=r.find('div',class_='tiny-star star-rating-non-editable-container') #fetch the star rating of reviewer
+      star=a_star.div['style']
+      a_rating=int(star[7:-2])/20
       t_id=long(0)
       a_score=long(0)
+      
       cursor=con.cursor()
-      cursor.callproc('sp_createuser',(a_name,a_score,t_id))
+      cursor.callproc('sp_createuser',(a_name,a_score,image_url,t_id))
       cursor.close()
       cursor=con.cursor()
-      cursor.execute('SELECT @_sp_createuser_2')
+      cursor.execute('SELECT @_sp_createuser_3')
       outParam = cursor.fetchall()   
       con.commit()
       u_id=long(outParam[0][0])
       cursor.close()
+      
       cursor=con.cursor()
-      cursor.execute("INSERT INTO user_apps VALUES (%s,%s)",(u_id,p_id))
+      cursor.execute("INSERT INTO user_apps VALUES (%s,%s,%s,%s)",(u_id,p_id,a_rating,r_date))
       con.commit()
       cursor.close()
-    return 'OK'
+      
+    return 'Done'
   except MySQLdb.Error, e:
         try:
             print "MySQL Error [%d]: %s" % (e.args[0], e.args[1])  
@@ -96,7 +157,7 @@ def specific_page(): #fetches all reviews with their author's name
   except ValueError, e:
         return render_template('error.html',error=str(e)) 
   finally:                                                                                                                                                                                  
-        con.close()
+        #con.close()
         return 'OK'                                                                                                                                                                                   
                                                                                                                                                                                             
 @app.route('/category',methods=['POST','GET'])                                                                                                                                              
